@@ -20,13 +20,13 @@ class PhotoBooth:
         self.camera = CameraClass.CameraObject()
         self.dropbox = DropboxClass.DropboxObject(self.dropbox_token)
         self.image_number = 0
-        self.dropbox_folder = "Wedding"     #The folder the file will be stored in
+        self.dropbox_folder = "Wedding"    # The folder the file will be stored in
 
     def main_use_case(self, number):
 
         image_path = self.camera.take_picture(number)
 
-        #Send to image manipulation class
+        # Send to image manipulation class
 
-        self.dropbox.upload_picture(image_path, self.dropbox_folder)
+        self.dropbox.upload_picture(image_path, self.dropbox_folder, self.image_number)
         self.twitter.tweet_picture(image_path, "This is some test text #TestyMcTestface")

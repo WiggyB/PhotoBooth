@@ -7,10 +7,10 @@ class DropboxObject:
         # Create an instance of a Dropbox class, which can make requests to the API.
         self.dbx = dropbox.Dropbox(token)
 
-    def upload_picture(self, filename, path):
+    def upload_picture(self, filename, path, image_number):
 
         # Filename example girl.jpg
         # Path is name of folder e.g Wedding
-
+        print('/' + path + '/' + filename)
         file = open(filename, 'rb')
-        self.dbx.files_upload(file.read(), '/' + path + '/' + filename, mute=True)
+        self.dbx.files_upload(file.read(), '/' + path + '/image' + str(image_number), mute=True)

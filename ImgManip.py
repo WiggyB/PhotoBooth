@@ -4,7 +4,7 @@ from PIL import Image
 from PIL import ImageFilter
 import os
 for filename in os.listdir("."): # parse through file list in the current directory
-     if filename[-3:] == "png":
+     if filename[-3:] == "jpg":
           img = Image.open(filename)
           img = img.convert("RGBA")
           pixdata = img.load()
@@ -16,5 +16,5 @@ for filename in os.listdir("."): # parse through file list in the current direct
                     #Remove anti-aliasing outline of body.
                     if r == 0 and g == 0 and b == 0:
                          pixdata[x, y] = (255, 255, 255, 0)
-          img2 = img.filter(ImageFilter.GaussianBlur(radius=1))
-          img2.save(filename, "png")
+          #     img2 = img.filter(ImageFilter.GaussianBlur(radius=1))
+          img.save(filename + "output", "JPEG")

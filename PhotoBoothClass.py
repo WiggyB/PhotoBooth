@@ -1,6 +1,9 @@
-import CameraClass
-import TwitterClass
-import DropboxClass
+# import CameraClass
+# import TwitterClass
+# import DropboxClass
+import CameraClassTest
+import DropboxClassTest
+import TwitterClassTest
 
 
 class PhotoBooth:
@@ -15,16 +18,23 @@ class PhotoBooth:
     consumer_secret = "B3JsT7UuB57ncKhZD174iR6k3kQ8lhKa6xj51h9i9l0mfO7S8F"
 
     def __init__(self):
-        self.twitter = TwitterClass.TwitterObject(token=self.token, token_secret=self.token_secret,
-                                            consumer_key=self.consumer_key, consumer_secret=self.consumer_secret)
-        self.camera = CameraClass.CameraObject()
-        self.dropbox = DropboxClass.DropboxObject(self.dropbox_token)
+        # self.twitter = TwitterClass.TwitterObject(token=self.token, token_secret=self.token_secret,
+        #                                           consumer_key=self.consumer_key, consumer_secret=self.consumer_secret)
+        # self.camera = CameraClass.CameraObject()
+        # self.dropbox = DropboxClass.DropboxObject(self.dropbox_token)
+        self.twitter = TwitterClassTest.TwitterObject(token=self.token,
+                                                      token_secret=self.token_secret,
+                                                      consumer_key=self.consumer_key,
+                                                      consumer_secret=self.consumer_secret)
+        self.camera = CameraClassTest.CameraObject()
+        self.dropbox = DropboxClassTest.DropboxObject(self.dropbox_token)
         self.image_number = 0
         self.dropbox_folder = "Wedding"    # The folder the file will be stored in
+        self.picture_number = 0             # add a config file to track numbers
 
-    def main_use_case(self, number):
-
-        image_path = self.camera.take_picture(number)
+    def main_use_case(self):
+        print("main use case has been triggered")
+        image_path = self.camera.take_picture(self.picture_number)
 
         # Send to image manipulation class
 

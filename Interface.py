@@ -1,8 +1,8 @@
 #!/usr/bin/env python 1
 import tkinter as tk
-import PhotoBooth
+import PhotoBoothClass
 
-app = PhotoBooth()
+app = PhotoBoothClass.PhotoBooth()
 
 
 def close_window ():

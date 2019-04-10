@@ -1,6 +1,7 @@
 from picamera import PiCamera
 import time
 
+
 class CameraObject:
 
     # Constructor for camera object

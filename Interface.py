@@ -16,7 +16,7 @@ class UI(tk.Tk):
         self.screen_width = self.winfo_screenwidth()
         self.screen_height = self.winfo_screenheight()
         image = Image.open("background_image.jpg")
-        image = image.resize((int(self.screen_width / 2), self.screen_height))
+        image = image.resize((int(self.screen_width), self.screen_height))
         self.background_image = ImageTk.PhotoImage(image)
 
         #self.background_image = tk.PhotoImage(file="background_image.jpg")

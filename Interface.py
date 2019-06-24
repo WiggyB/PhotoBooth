@@ -1,15 +1,17 @@
 #!/usr/bin/env python 1
-import tkinter as tk
+from tkinter import *
 import PhotoBoothClass
 from PIL import Image, ImageTk
 
+root = Tk()
 
-class UI(tk.Tk):
+
+class UI(Tk):
 
     def __init__(self, *args, **kwargs):
 
-        tk.Tk.__init__(self, *args, **kwargs)
-        container = tk.Frame(self)
+        Tk.__init__(self, *args, **kwargs)
+        container = Frame(self)
 
         container.pack(side="top", fill="both", expand=True)
 
@@ -47,49 +49,50 @@ class UI(tk.Tk):
         print(self.screen_width)
 
 
-class StartPage(tk.Frame):
+class StartPage(Frame):
 
     def __init__(self, parent, controller):
 
-        tk.Frame.__init__(self, parent)
+        Frame.__init__(self, parent)
         # Allows for JPEG file type to be used
-        self.screen_width = self.winfo_screenwidth()
+        self.screen_width = self.winfo_screenwidth() / 2
         self.screen_height = self.winfo_screenheight()
         image = Image.open("background_image.jpg")
         image = image.resize((int(self.screen_width), self.screen_height))
         self.background_image = ImageTk.PhotoImage(image)
-        #self.background_image = tk.PhotoImage(file="background_image.jpg")
-
-        self.background_label = tk.Label(self, image=self.background_image)
-        #self.background_label.place(x=0, y=0, width=self.screen_width, height=self.screen_height)
+        self.background_label = Label(self, image=self.background_image)
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
-        self.quit_button = tk.Button(self, text="Quit", justify="center", command=lambda: controller.close_window())
+
+        self.quit_button = Button(self, text="Quit", justify="center", command=lambda: controller.close_window())
+        self.quit_button.pack()
         self.quit_button.place(relx=0.5, rely=0.8)
-        self.start_button = tk.Button(self, text="Start", justify="center", command=lambda: controller.show_frame(PageOne))
+        self.start_button = Button(self, text="Start", justify="center", command=lambda: controller.show_frame(PageOne))
+        self.start_button.pack()
         self.start_button.place(relx=0.5, rely=0.5)
 
 
-class PageOne(tk.Frame):
+class PageOne(Frame):
 
     def __init__(self, parent, controller):
 
-        tk.Frame.__init__(self, parent)
+        Frame.__init__(self, parent)
         # Allows for JPEG file type to be used
-        self.screen_width = self.winfo_screenwidth()
+        self.screen_width = self.winfo_screenwidth() / 2
         self.screen_height = self.winfo_screenheight()
         image = Image.open("background_image.jpg")
         image = image.resize((int(self.screen_width), self.screen_height))
         self.background_image = ImageTk.PhotoImage(image)
-        #self.background_image = tk.PhotoImage(file="background_image.jpg")
-
-        self.background_label = tk.Label(self, image=self.background_image)
-        #self.background_label.place(x=0, y=0, width=self.screen_width, height=self.screen_height)
+        self.background_label = Label(self, image=self.background_image)
         self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
-        self.quit_button = tk.Button(self, text="Quit", justify="center", command=lambda: controller.close_window())
-        self.quit_button.place(relx=0.5, rely=0.8)
-        self.start_button = tk.Button(self, text="Start", justify="center", command=lambda: controller.show_frame(StartPage))
-        self.start_button.place(relx=0.5, rely=0.5)
 
+        self.back_button = Button(self, text="Back", justify="center", command=lambda: controller.show_frame(StartPage))
+        self.back_button.place(relx=0.5, rely=0.5)
+        self.quit_button = Button(self, text="Quit", justify="center", command=lambda: controller.close_window())
+        self.quit_button.place(relx=0.5, rely=0.8)
+        self.permissionLabel = Label(controller, text="Do you give permission for pho", justify="center")
+        self.permissionLabel.pack()
+
+        
 app = UI()
 app.mainloop()
 

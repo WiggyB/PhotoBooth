@@ -1,9 +1,9 @@
-# import CameraClass
-# import TwitterClass
-# import DropboxClass
-import CameraClassTest
-import DropboxClassTest
-import TwitterClassTest
+import CameraClass
+import TwitterClass
+import DropboxClass
+#import CameraClassTest as CameraClass
+#import DropboxClassTest as DropboxClass
+#import TwitterClassTest as TwitterClass
 
 
 class PhotoBooth:
@@ -22,12 +22,12 @@ class PhotoBooth:
         #                                           consumer_key=self.consumer_key, consumer_secret=self.consumer_secret)
         # self.camera = CameraClass.CameraObject()
         # self.dropbox = DropboxClass.DropboxObject(self.dropbox_token)
-        self.twitter = TwitterClassTest.TwitterObject(token=self.token,
-                                                      token_secret=self.token_secret,
-                                                      consumer_key=self.consumer_key,
-                                                      consumer_secret=self.consumer_secret)
-        self.camera = CameraClassTest.CameraObject()
-        self.dropbox = DropboxClassTest.DropboxObject(self.dropbox_token)
+        self.twitter = TwitterClass.TwitterObject(token=self.token,
+                                                  token_secret=self.token_secret,
+                                                  consumer_key=self.consumer_key,
+                                                  consumer_secret=self.consumer_secret)
+        self.camera = CameraClass.CameraObject()
+        self.dropbox = DropboxClass.DropboxObject(self.dropbox_token)
         self.image_number = 0
         self.dropbox_folder = "Wedding"    # The folder the file will be stored in
         self.picture_number = 0             # add a config file to track numbers

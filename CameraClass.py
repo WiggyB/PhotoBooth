@@ -12,7 +12,7 @@ class CameraObject:
         self.camera.framerate = 15
 
     def open_window(self):
-        self.camera.start_preview()
+        self.camera.start_preview(fullscreen=False, window=(0, -80, 640, 640))
 
     def close_window(self):
         self.camera.stop_preview()

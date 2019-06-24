@@ -1,30 +1,6 @@
 import tkinter as tk
 import PhotoBoothClass
 from PIL import Image, ImageTk
-from tkinter.ttk import *
-#
-# class StartPage:
-#
-#     def __init__(self, master):
-#         frameOne = Frame(master)
-#         frameOne.pack()
-#
-#         self.quit_button = Button(frameOne, text="Quit", command=lambda: root.destroy())
-#         self.quit_button.pack(side=BOTTOM)
-#
-#         self.start_button = Button(frameOne, text="Start")
-#         self.start_button.pack(side=TOP)
-#
-#         self.screen_width = frameOne.winfo_screenwidth() / 2
-#         self.screen_height = frameOne.winfo_screenheight()
-#         master.attributes("-fullscreen", True)
-#
-#
-# root = Tk()
-# app = StartPage(root)
-# root.mainloop()
-
-# Multi-frame tkinter application v2.3
 
 
 class App(tk.Tk):
@@ -37,7 +13,7 @@ class App(tk.Tk):
 
         # Creates PhotoboothClass object
         self.core = PhotoBoothClass.PhotoBooth()
-        #self.attributes('-fullscreen', True)
+        self.attributes('-fullscreen', True)
         self.title("Photo Booth")
 
     def switch_frame(self, frame_class):

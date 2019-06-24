@@ -2,8 +2,8 @@ import CameraClass
 import TwitterClass
 import DropboxClass
 #import CameraClassTest as CameraClass
-#import DropboxClassTest as DropboxClass
 #import TwitterClassTest as TwitterClass
+#import DropboxClassTest as DropboxClass
 
 
 class PhotoBooth:

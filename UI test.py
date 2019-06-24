@@ -53,7 +53,7 @@ class StartPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
 
-        tk.Label(self, text="Press Start to Begin").pack(side="top", pady=50, padx=50)
+        tk.Label(self, text="Press Start to Begin").pack(side="top", pady=11, padx=10)
         tk.Button(self, pady=50, text="Start",
                   command=lambda: master.switch_frame(PageOne)).pack()
         tk.Button(self, text="Quit",
@@ -64,7 +64,7 @@ class PageOne(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="The photographs taken by this photobooth will be saved in the cloud and posted to twitter")\
-            .pack(side="top", fill="x", pady=50, padx=50)
+            .pack(side="top", fill="x", pady=10, padx=10)
         tk.Button(self, text="No I do not",
                   command=lambda: master.switch_frame(StartPage)).pack()
         tk.Button(self, text="Yes I do!",
@@ -75,7 +75,7 @@ class PageTwo(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         text = tk.Label(self, text="Select a background")
-        text.pack(side="top", pady=50, padx=50)
+        text.pack(side="top", pady=10, padx=10)
 
         self.backgrounds = []
         self.ImageNumber = 0
@@ -130,7 +130,7 @@ class PageThree(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         text = tk.Label(self, text="Preview")
-        text.pack(side="top", pady=50, padx=50)
+        text.pack(side="top", pady=10, padx=10)
         app.core.camera.open_window()
 
 

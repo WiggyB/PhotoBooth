@@ -1,9 +1,14 @@
-#import CameraClass
-#import TwitterClass
-#import DropboxClass
-import CameraClassTest as CameraClass
-import TwitterClassTest as TwitterClass
-import DropboxClassTest as DropboxClass
+import os
+
+# If running pi, import proper classes
+if os.uname()[4][:3] == 'arm':
+    import CameraClass
+    import TwitterClass
+    import DropboxClass
+else:
+    import CameraClassTest as CameraClass
+    import TwitterClassTest as TwitterClass
+    import DropboxClassTest as DropboxClass
 
 
 class PhotoBooth:
@@ -28,15 +33,30 @@ class PhotoBooth:
                                                   consumer_secret=self.consumer_secret)
         self.camera = CameraClass.CameraObject()
         self.dropbox = DropboxClass.DropboxObject(self.dropbox_token)
-        self.image_number = 0
         self.dropbox_folder = "Wedding"    # The folder the file will be stored in
-        self.picture_number = 0             # add a config file to track numbers
 
-    def main_use_case(self):
+        exists = os.path.isfile('config.cfg')
+        if exists:
+            print("file does exist")
+            f = open('config.cfg', 'r')
+            self.picture_number = int(f.readline())
+            f.close()
+        else:
+            print('file does not exist')
+            f = open('config.cfg', 'x')
+            self.picture_number = 0
+            f.write(str(self.picture_number))
+            f.close()
+
+    def take_picture(self):
         print("main use case has been triggered")
+        self.picture_number += 1
         image_path = self.camera.take_picture(self.picture_number)
 
+        f = open('config.cfg', 'w')
+        f.write(str(self.picture_number))
+        f.close()
         # Send to image manipulation class
 
-        self.dropbox.upload_picture(image_path, self.dropbox_folder, self.image_number)
-        self.twitter.tweet_picture(image_path, "This is some test text #TestyMcTestface")
+        self.dropbox.upload_picture(image_path, self.dropbox_folder, self.picture_number)
+        self.twitter.tweet_picture(image_path, "Picture Number " + str(self.picture_number) + ". #KatieChris2019")

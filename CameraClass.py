@@ -18,8 +18,6 @@ class CameraObject:
         self.camera.stop_preview()
 
     def take_picture(self, number):
-        self.open_window()
-        time.sleep(3)
         self.camera.capture('/home/pi/Desktop/image%s.jpg' % number)
         self.close_window()
         return '/home/pi/Desktop/image%s.jpg' % number

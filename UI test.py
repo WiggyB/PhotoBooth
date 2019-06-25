@@ -1,7 +1,6 @@
 import tkinter as tk
 import PhotoBoothClass
 from PIL import Image, ImageTk
-import time
 
 
 class App(tk.Tk):
@@ -12,7 +11,7 @@ class App(tk.Tk):
 
         self.background_choice = 0
 
-        # Creates PhotoboothClass object
+        # Creates PhotoBoothClass object
         self.core = PhotoBoothClass.PhotoBooth()
         self.attributes('-fullscreen', True)
         self.title("Photo Booth")
@@ -40,8 +39,8 @@ class StartPage(tk.Frame):
 class PageOne(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        tk.Label(self, text="The photographs taken by this photobooth will be saved in the cloud and posted to twitter")\
-            .pack(side="top", fill="x", pady=10, padx=10)
+        tk.Label(self, text="The photographs taken by this photo booth will be saved in the cloud"
+                            " and posted to twitter").pack(side="top", fill="x", pady=10, padx=10)
         tk.Button(self, text="No I do not", command=lambda: master.switch_frame(StartPage)).pack()
         tk.Button(self, text="Yes I do!", command=lambda: master.switch_frame(PageTwo)).pack()
 
@@ -70,29 +69,29 @@ class PageTwo(tk.Frame):
         self.backgrounds.append(punk_image)
         self.backgrounds.append(space_image)
 
-        selectButton = tk.Button(self, text="Select", command=lambda: master.switch_frame(PageThree))
-        selectButton.pack(side="bottom")
+        select_button = tk.Button(self, text="Select", command=lambda: master.switch_frame(PageThree))
+        select_button.pack(side="bottom")
 
-        returnButton = tk.Button(self, text="Return to start page", command=lambda: master.switch_frame(StartPage))
-        returnButton.pack(side="bottom")
+        return_button = tk.Button(self, text="Return to start page", command=lambda: master.switch_frame(StartPage))
+        return_button.pack(side="bottom")
 
-        leftArrowImg = tk.PhotoImage(file='arrowleft.png')
-        leftArrowImg = leftArrowImg.subsample(2,2)
-        leftButton = tk.Button(self, image=leftArrowImg, command=lambda: self.changeBackgroundImage(-1))
-        leftButton.image = leftArrowImg
-        leftButton.pack(side="left")
+        left_arrow_img = tk.PhotoImage(file='arrowleft.png')
+        left_arrow_img = left_arrow_img.subsample(2, 2)
+        left_button = tk.Button(self, image=left_arrow_img, command=lambda: self.change_background_image(-1))
+        left_button.image = left_arrow_img
+        left_button.pack(side="left")
 
-        rightArrowImg = tk.PhotoImage(file='arrowright.png')
-        rightArrowImg = rightArrowImg.subsample(2, 2)
-        rightButton = tk.Button(self, image=rightArrowImg, command=lambda: self.changeBackgroundImage(1))
-        rightButton.image = rightArrowImg
-        rightButton.pack(side="right")
+        right_arrow_img = tk.PhotoImage(file='arrowright.png')
+        right_arrow_img = right_arrow_img.subsample(2, 2)
+        right_button = tk.Button(self, image=right_arrow_img, command=lambda: self.change_background_image(1))
+        right_button.image = right_arrow_img
+        right_button.pack(side="right")
 
         self.label = tk.Label(self, image=self.backgrounds[self.ImageNumber])
         self.label.image = self.backgrounds[0]
         self.label.pack()
 
-    def changeBackgroundImage(self, choice):
+    def change_background_image(self, choice):
         app.background_choice += choice
         if app.background_choice == len(self.backgrounds):
             app.background_choice = 0
@@ -135,7 +134,8 @@ class PageThree(tk.Frame):
 
         def countdown_timer():
             if self.count == 3:
-                print("done")
+                app.switch_frame(PageFour)
+                app.core.take_picture()
                 return
             self.countdown_label.configure(image=self.countdown_images[self.count])
             self.countdown_label.photo = self.countdown_images[self.count]
@@ -148,6 +148,13 @@ class PageThree(tk.Frame):
         self.back_button.place_forget()
         self.countdown_label.place(x=640, y=50)
         app.after(0, countdown_timer)
+
+
+class PageFour(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.loading_label = tk.Label(master, text="Loading...")
+        self.loading_label.place(relx=0.5, rely=0.5, anchor='center')
 
 
 if __name__ == "__main__":

@@ -1,9 +1,9 @@
-import CameraClass
-import TwitterClass
-import DropboxClass
-#import CameraClassTest as CameraClass
-#import TwitterClassTest as TwitterClass
-#import DropboxClassTest as DropboxClass
+#import CameraClass
+#import TwitterClass
+#import DropboxClass
+import CameraClassTest as CameraClass
+import TwitterClassTest as TwitterClass
+import DropboxClassTest as DropboxClass
 
 
 class PhotoBooth:

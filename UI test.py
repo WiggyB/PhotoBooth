@@ -1,6 +1,7 @@
 import tkinter as tk
 import PhotoBoothClass
 from PIL import Image, ImageTk
+import time
 
 
 class App(tk.Tk):
@@ -41,10 +42,8 @@ class PageOne(tk.Frame):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="The photographs taken by this photobooth will be saved in the cloud and posted to twitter")\
             .pack(side="top", fill="x", pady=10, padx=10)
-        tk.Button(self, text="No I do not",
-                  command=lambda: master.switch_frame(StartPage)).pack()
-        tk.Button(self, text="Yes I do!",
-                  command=lambda: master.switch_frame(PageTwo)).pack()
+        tk.Button(self, text="No I do not", command=lambda: master.switch_frame(StartPage)).pack()
+        tk.Button(self, text="Yes I do!", command=lambda: master.switch_frame(PageTwo)).pack()
 
 
 class PageTwo(tk.Frame):
@@ -80,12 +79,12 @@ class PageTwo(tk.Frame):
         leftArrowImg = tk.PhotoImage(file='arrowleft.png')
         leftArrowImg = leftArrowImg.subsample(2,2)
         leftButton = tk.Button(self, image=leftArrowImg, command=lambda: self.changeBackgroundImage(-1))
-        leftArrowImg.image = leftArrowImg
+        leftButton.image = leftArrowImg
         leftButton.pack(side="left")
 
         rightArrowImg = tk.PhotoImage(file='arrowright.png')
         rightArrowImg = rightArrowImg.subsample(2, 2)
-        rightButton = tk.Button(self,image=rightArrowImg, command=lambda: self.changeBackgroundImage(1))
+        rightButton = tk.Button(self, image=rightArrowImg, command=lambda: self.changeBackgroundImage(1))
         rightButton.image = rightArrowImg
         rightButton.pack(side="right")
 
@@ -105,9 +104,50 @@ class PageTwo(tk.Frame):
 class PageThree(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        text = tk.Label(self, text="Preview")
-        text.pack(side="top", pady=10, padx=10)
+        self.countdown_images = []
+        temp = Image.open("1.png")
+        self.image_1 = ImageTk.PhotoImage(temp)
+        temp = Image.open("2.png")
+        self.image_2 = ImageTk.PhotoImage(temp)
+        temp = Image.open("3.png")
+        self.image_3 = ImageTk.PhotoImage(temp)
+
+        self.countdown_images.append(self.image_3)
+        self.countdown_images.append(self.image_2)
+        self.countdown_images.append(self.image_1)
+
+        self.count = 0
+
+        # Creating canvas. Used so the place manager can be used
+        self.w = tk.Canvas(self, bg='pink', width=800, height=480)
+        self.w.pack()
+        self.ready_button = tk.Button(self.w, text="Begin \nCountdown", command=lambda: self.countdown())
+        self.ready_button.config(height=15, width=17)
+        self.ready_button.place(x=640, y=50)
+        self.back_button = tk.Button(self.w, text="Back", command=lambda: [app.switch_frame(PageTwo),
+                                                                           self.w.delete("all")])
+        self.back_button.config(height=5, width=17)
+        self.back_button.place(x=640, y=330)
+        self.countdown_label = tk.Label(self.w, image=self.countdown_images[0], bg='pink', height=400, width=200)
         app.core.camera.open_window()
+
+    def countdown(self):
+
+        def countdown_timer():
+            if self.count == 3:
+                print("done")
+                return
+            self.countdown_label.configure(image=self.countdown_images[self.count])
+            self.countdown_label.photo = self.countdown_images[self.count]
+            self.countdown_label.place(x=620, y=50)
+            self.count += 1
+            print(self.count)
+            app.after(1000, countdown_timer)
+
+        self.ready_button.place_forget()
+        self.back_button.place_forget()
+        self.countdown_label.place(x=640, y=50)
+        app.after(0, countdown_timer)
 
 
 if __name__ == "__main__":

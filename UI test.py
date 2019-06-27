@@ -1,7 +1,7 @@
 import tkinter as tk
 import PhotoBoothClass
 from PIL import Image, ImageTk
-
+import time
 
 class App(tk.Tk):
     def __init__(self):
@@ -9,11 +9,9 @@ class App(tk.Tk):
         self._frame = None
         self.switch_frame(StartPage)
 
-        self.background_choice = 0
-
         # Creates PhotoBoothClass object
         self.core = PhotoBoothClass.PhotoBooth()
-        self.attributes('-fullscreen', True)
+        #self.attributes('-fullscreen', True)
         self.title("Photo Booth")
 
     def switch_frame(self, frame_class):
@@ -51,24 +49,6 @@ class PageTwo(tk.Frame):
         text = tk.Label(self, text="Select a background")
         text.pack(side="top", pady=10, padx=10)
 
-        self.backgrounds = []
-        self.ImageNumber = 0
-        nature_image = Image.open("nature.jpg")
-        nature_image = nature_image.resize((300, 300))
-        nature_image = ImageTk.PhotoImage(nature_image)
-
-        punk_image = Image.open("punk.jpg")
-        punk_image = punk_image.resize((300, 300))
-        punk_image = ImageTk.PhotoImage(punk_image)
-
-        space_image = Image.open("spacebackground.jpg")
-        space_image = space_image.resize((300, 300))
-        space_image = ImageTk.PhotoImage(space_image)
-
-        self.backgrounds.append(nature_image)
-        self.backgrounds.append(punk_image)
-        self.backgrounds.append(space_image)
-
         select_button = tk.Button(self, text="Select", command=lambda: master.switch_frame(PageThree))
         select_button.pack(side="bottom")
 
@@ -87,33 +67,36 @@ class PageTwo(tk.Frame):
         right_button.image = right_arrow_img
         right_button.pack(side="right")
 
-        self.label = tk.Label(self, image=self.backgrounds[self.ImageNumber])
-        self.label.image = self.backgrounds[0]
+        self.label = tk.Label(self, image=master.core.backgrounds_preview[master.core.ImageNumber])
+        self.label.image = master.core.backgrounds_preview[master.core.ImageNumber]
         self.label.pack()
 
     def change_background_image(self, choice):
-        app.background_choice += choice
-        if app.background_choice == len(self.backgrounds):
-            app.background_choice = 0
-        if app.background_choice == -1:
-            app.background_choice = len(self.backgrounds)-1
-        self.label.configure(image=self.backgrounds[app.background_choice])
+        app.core.background_choice += choice
+        if app.core.background_choice == len(self.master.core.backgrounds_preview):
+            app.core.background_choice = 0
+        if app.core.background_choice == -1:
+            app.core.background_choice = len(self.master.core.backgrounds_preview)-1
+        self.label.configure(image=self.master.core.backgrounds_preview[app.core.background_choice])
 
 
 class PageThree(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.countdown_images = []
-        temp = Image.open("1.png")
-        self.image_1 = ImageTk.PhotoImage(temp)
-        temp = Image.open("2.png")
-        self.image_2 = ImageTk.PhotoImage(temp)
-        temp = Image.open("3.png")
-        self.image_3 = ImageTk.PhotoImage(temp)
+        for x in range(3, 0, -1):
+            print(x)
+            self.countdown_images.append(ImageTk.PhotoImage(Image.open(str(x) + '.png')))
+            #temp = Image.open("1.png")
+            #self.image_1 = ImageTk.PhotoImage(temp)
+            #temp = Image.open("2.png")
+            #self.image_2 = ImageTk.PhotoImage(temp)
+            #temp = Image.open("3.png")
+            #self.image_3 = ImageTk.PhotoImage(temp)
 
-        self.countdown_images.append(self.image_3)
-        self.countdown_images.append(self.image_2)
-        self.countdown_images.append(self.image_1)
+            #self.countdown_images.append(self.image_3)
+            #self.countdown_images.append(self.image_2)
+            #self.countdown_images.append(self.image_1)
 
         self.count = 0
 
@@ -127,6 +110,7 @@ class PageThree(tk.Frame):
                                                                            self.w.delete("all")])
         self.back_button.config(height=5, width=17)
         self.back_button.place(x=640, y=330)
+        print(len(self.countdown_images))
         self.countdown_label = tk.Label(self.w, image=self.countdown_images[0], bg='pink', height=400, width=200)
         app.core.camera.open_window()
 
@@ -134,14 +118,18 @@ class PageThree(tk.Frame):
 
         def countdown_timer():
             if self.count == 3:
+                start = time.time()
                 app.switch_frame(PageFour)
-                app.core.take_picture()
+                switchFrame = time.time()
+                print("change frame: " + str(switchFrame - start))
+                # app.core.take_picture()
+                end = time.time()
+                print("change take_picture: " + str(end - switchFrame))
                 return
             self.countdown_label.configure(image=self.countdown_images[self.count])
             self.countdown_label.photo = self.countdown_images[self.count]
             self.countdown_label.place(x=620, y=50)
             self.count += 1
-            print(self.count)
             app.after(1000, countdown_timer)
 
         self.ready_button.place_forget()
@@ -155,6 +143,13 @@ class PageFour(tk.Frame):
         tk.Frame.__init__(self, master)
         self.loading_label = tk.Label(master, text="Loading...")
         self.loading_label.place(relx=0.5, rely=0.5, anchor='center')
+        app.core.take_picture()
+
+
+class PageFive(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.picture = tk.Label(master)
 
 
 if __name__ == "__main__":

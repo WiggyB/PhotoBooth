@@ -14,6 +14,6 @@ class DropboxObject:
         print(image_number)
         # Path is name of folder e.g Wedding
         file = open(filename, 'rb')
-        self.dbx.files_upload(file.read(), '/' + path + '/image_' + str(image_number) + '.jpg',
+        self.dbx.files_upload(file.read(), '/' + path + '/image_' + str(image_number) + '.png',
                               mode=WriteMode.add)
         file.close()

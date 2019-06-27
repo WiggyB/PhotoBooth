@@ -2,7 +2,7 @@
 class CameraObject:
 
     # Constructor for camera object
-    def __init__(self):
+    def __init__(self, image_size):
         self.test = "test"
 
     def open_window(self):

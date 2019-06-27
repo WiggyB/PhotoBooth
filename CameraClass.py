@@ -1,14 +1,12 @@
 from picamera import PiCamera
-import time
 
 
 class CameraObject:
 
-    # Constructor for camera object
-    def __init__(self):
+    def __init__(self, image_size):
         self.camera = PiCamera()
         self.camera.rotation = 200
-        self.camera.resolution = (2592, 1944)
+        self.camera.resolution = image_size
         self.camera.framerate = 15
 
     def open_window(self):
@@ -18,6 +16,7 @@ class CameraObject:
         self.camera.stop_preview()
 
     def take_picture(self, number):
-        self.camera.capture('/home/pi/Desktop/image%s.jpg' % number)
+        path = '/home/pi/Desktop/image%s.png' % number
+        self.camera.capture(path, format='png')
         self.close_window()
-        return '/home/pi/Desktop/image%s.jpg' % number
+        return path

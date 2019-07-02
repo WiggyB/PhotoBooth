@@ -1,6 +1,7 @@
 from twitter import *
 
 
+# An object that deals with tweeting processed pictures with hash tags.
 class TwitterObject:
 
     def __init__(self, token, token_secret, consumer_key, consumer_secret):

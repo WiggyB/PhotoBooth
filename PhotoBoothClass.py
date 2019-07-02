@@ -1,9 +1,8 @@
 import os
-# import ImageMerge
-import ImageParellel as ImageMerge
+import ImageMerge
 from PIL import Image, ImageTk
 
-# If running pi, import proper classes
+# If running on Raspberry pi import proper classes, if not run Dummy classes
 if os.uname()[4][:3] == 'arm':
     import CameraClass
     import TwitterClass
@@ -24,8 +23,7 @@ class PhotoBooth:
     token_secret = "6qFafsqUFPwUKtljd5WYGvt1xTtfUMYJH5UYuLzCj7inF"
     consumer_key = "wQy0diWcyl1G4GP4eF1arBPtS"
     consumer_secret = "B3JsT7UuB57ncKhZD174iR6k3kQ8lhKa6xj51h9i9l0mfO7S8F"
-    #image_size = (2592, 1944)
-    image_size = (1920, 1080)
+    image_size = (2592, 1944)
     preview_size = (300, 300)
 
     def __init__(self):
@@ -44,23 +42,22 @@ class PhotoBooth:
 
         self.ImageNumber = 0
 
+        self.merge_path = ''
+
         nature_image = Image.open("nature.jpg")
-        nature_preview = nature_image.resize(self.preview_size)
+        nature_preview = nature_image.resize(self.preview_size, Image.ANTIALIAS)
         nature_preview = ImageTk.PhotoImage(nature_preview)
-        nature_full = nature_image.resize(self.image_size)
-        # nature_full = ImageTk.PhotoImage(nature_full)
+        nature_full = nature_image.resize(self.image_size, Image.ANTIALIAS)
 
         punk_image = Image.open("punk.jpg")
-        punk_preview = punk_image.resize(self.preview_size)
+        punk_preview = punk_image.resize(self.preview_size, Image.ANTIALIAS)
         punk_preview = ImageTk.PhotoImage(punk_preview)
-        punk_full = punk_image.resize(self.image_size)
-        # punk_full = ImageTk.PhotoImage(punk_full)
+        punk_full = punk_image.resize(self.image_size, Image.ANTIALIAS)
 
         space_image = Image.open("spacebackground.jpg")
-        space_preview = space_image.resize(self.preview_size)
+        space_preview = space_image.resize(self.preview_size, Image.ANTIALIAS)
         space_preview = ImageTk.PhotoImage(space_preview)
-        space_full = space_image.resize(self.image_size)
-        # space_full = ImageTk.PhotoImage(space_full)
+        space_full = space_image.resize(self.image_size, Image.ANTIALIAS)
 
         self.backgrounds_preview.append(nature_preview)
         self.backgrounds_preview.append(punk_preview)
@@ -70,6 +67,8 @@ class PhotoBooth:
         self.backgrounds_full.append(punk_full)
         self.backgrounds_full.append(space_full)
 
+        # Config file will hold any data that needs to be saved, currently only picture number is stored
+        # Will use later to store info about images that haven't been uploaded yet, in case of an internet outage
         exists = os.path.isfile('config.cfg')
         if exists:
             # File exists
@@ -83,15 +82,22 @@ class PhotoBooth:
             f.write(str(self.picture_number))
             f.close()
 
-    def take_picture(self):
+    # Takes the picture, sends it for processing and then sends relevant info to twitter and dropbox objects
+    def take_picture(self, frame, progress_bar):
         self.picture_number += 1
         image_path = self.camera.take_picture(self.picture_number)
 
         f = open('config.cfg', 'w')
         f.write(str(self.picture_number))
         f.close()
-        merge_path = ImageMerge.merge(image_path, self.backgrounds_full[self.background_choice], self.image_size)
-        # Send to image manipulation class
 
-        self.dropbox.upload_picture(merge_path, self.dropbox_folder, self.picture_number)
-        self.twitter.tweet_picture(merge_path, "Picture Number " + str(self.picture_number) + ". #KatieChris2019")
+        # Send to image manipulation class
+        self.merge_path = ImageMerge.merge(image_path, self.backgrounds_full[self.background_choice],
+                                           self.image_size, progress_bar)
+
+        self.dropbox.upload_picture(self.merge_path, self.dropbox_folder, self.picture_number)
+        self.twitter.tweet_picture(self.merge_path, "Picture Number " + str(self.picture_number) + ". #KatieChris2019")
+        frame.process_complete()
+
+    def get_merge_path(self):
+        return self.merge_path

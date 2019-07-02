@@ -2,6 +2,7 @@ import dropbox
 from dropbox.files import WriteMode
 
 
+# An object that deals with uploading files to dropbox.
 class DropboxObject:
 
     def __init__(self, token):
@@ -9,11 +10,8 @@ class DropboxObject:
         self.dbx = dropbox.Dropbox(token)
 
     def upload_picture(self, filename, path, image_number):
-        print(filename)
-        print(path)
-        print(image_number)
         # Path is name of folder e.g Wedding
         file = open(filename, 'rb')
         self.dbx.files_upload(file.read(), '/' + path + '/image_' + str(image_number) + '.png',
-                              mode=WriteMode.add)
+                              mode=dropbox.files.WriteMode.add)
         file.close()

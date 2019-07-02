@@ -12,4 +12,4 @@ class CameraObject:
         return
 
     def take_picture(self, number):
-        return '/home/chris/Desktop/TM470 Project/test_image.jpg'
+        return '/home/chris/Desktop/TM470 Project/image9.png'

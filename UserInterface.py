@@ -1,8 +1,12 @@
 import tkinter as tk
+from tkinter.ttk import Progressbar
 import PhotoBoothClass
 from PIL import Image, ImageTk
 import time
+import threading
 
+
+# Master TK object
 class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -13,9 +17,11 @@ class App(tk.Tk):
         self.core = PhotoBoothClass.PhotoBooth()
         #self.attributes('-fullscreen', True)
         self.title("Photo Booth")
+        self.start = 0
+        self.end = 0
 
+    # Destroys current frame object and replaces it with a new one
     def switch_frame(self, frame_class):
-        """Destroys current frame and replaces it with a new one."""
         new_frame = frame_class(self)
         if self._frame is not None:
             self._frame.destroy()
@@ -38,7 +44,8 @@ class PageOne(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         tk.Label(self, text="The photographs taken by this photo booth will be saved in the cloud"
-                            " and posted to twitter").pack(side="top", fill="x", pady=10, padx=10)
+                            " and posted to twitter \n Do you consent to this?").pack(side="top", fill="x",
+                                                                                      pady=10, padx=10)
         tk.Button(self, text="No I do not", command=lambda: master.switch_frame(StartPage)).pack()
         tk.Button(self, text="Yes I do!", command=lambda: master.switch_frame(PageTwo)).pack()
 
@@ -85,22 +92,12 @@ class PageThree(tk.Frame):
         tk.Frame.__init__(self, master)
         self.countdown_images = []
         for x in range(3, 0, -1):
-            print(x)
             self.countdown_images.append(ImageTk.PhotoImage(Image.open(str(x) + '.png')))
-            #temp = Image.open("1.png")
-            #self.image_1 = ImageTk.PhotoImage(temp)
-            #temp = Image.open("2.png")
-            #self.image_2 = ImageTk.PhotoImage(temp)
-            #temp = Image.open("3.png")
-            #self.image_3 = ImageTk.PhotoImage(temp)
-
-            #self.countdown_images.append(self.image_3)
-            #self.countdown_images.append(self.image_2)
-            #self.countdown_images.append(self.image_1)
 
         self.count = 0
 
-        # Creating canvas. Used so the place manager can be used
+        # Creating canvas. A canvas is used so we can use the place manager.
+        # This is required due to the preview screen being shown above the GUI
         self.w = tk.Canvas(self, bg='pink', width=800, height=480)
         self.w.pack()
         self.ready_button = tk.Button(self.w, text="Begin \nCountdown", command=lambda: self.countdown())
@@ -110,22 +107,19 @@ class PageThree(tk.Frame):
                                                                            self.w.delete("all")])
         self.back_button.config(height=5, width=17)
         self.back_button.place(x=640, y=330)
-        print(len(self.countdown_images))
         self.countdown_label = tk.Label(self.w, image=self.countdown_images[0], bg='pink', height=400, width=200)
         app.core.camera.open_window()
 
     def countdown(self):
 
+        # Starts the countdown to take the picture, changes displayed image
+        # the "after" method is used because time.sleep() would stop the TK mainloop as well, freezing the whole app
         def countdown_timer():
             if self.count == 3:
-                start = time.time()
-                app.switch_frame(PageFour)
-                switchFrame = time.time()
-                print("change frame: " + str(switchFrame - start))
-                # app.core.take_picture()
-                end = time.time()
-                print("change take_picture: " + str(end - switchFrame))
+                self.master.start = time.time()
+                self.master.switch_frame(PageFour)
                 return
+
             self.countdown_label.configure(image=self.countdown_images[self.count])
             self.countdown_label.photo = self.countdown_images[self.count]
             self.countdown_label.place(x=620, y=50)
@@ -141,17 +135,44 @@ class PageThree(tk.Frame):
 class PageFour(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        self.loading_label = tk.Label(master, text="Loading...")
-        self.loading_label.place(relx=0.5, rely=0.5, anchor='center')
-        app.core.take_picture()
+        self.w = tk.Canvas(self, bg='pink', width=800, height=480)
+        self.w.pack()
+        self.progress_bar = Progressbar(self, orient=tk.HORIZONTAL, length=500, mode='determinate',
+                                        maximum=self.master.core.image_size[1])
+        self.progress_bar.place(relx=0.5, rely=0.5, anchor='center')
+
+        self.quitButton = tk.Button(self.w, text="Quit", command=master.quit, pady=20, padx=20)
+        self.quitButton.place(relx=0.5, rely=0.7, anchor='center')
+
+        # Starts the Image processing in a separate thread so the GUI is responsive
+        threading.Thread(target=self.threading_picture).start()
+
+    def threading_picture(self):
+        app.core.take_picture(self, self.progress_bar)
+        return
+
+    def process_complete(self):
+        self.master.switch_frame(PageFive)
 
 
 class PageFive(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        self.picture = tk.Label(master)
+        processed_photo = Image.open(self.master.core.get_merge_path())
+        processed_photo = processed_photo.resize((640, 360))
+        processed_photo = ImageTk.PhotoImage(processed_photo)
+
+        self.picture = tk.Label(self, image=processed_photo)
+        self.picture.image = processed_photo
+        self.picture.pack()
+        self.start_button = tk.Button(self, text="Start Again", command=master.switch_frame(StartPage),
+                                      pady=20, padx=20)
+        self.start_button.pack()
+        self.quit_button = tk.Button(self, text="Quit", command=master.quit, pady=20, padx=20)
+        self.quit_button.pack()
 
 
+# Start main loop
 if __name__ == "__main__":
     app = App()
     app.mainloop()

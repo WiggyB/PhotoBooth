@@ -1,6 +1,7 @@
 from picamera import PiCamera
 
 
+# A wrapper around the PiCamera module
 class CameraObject:
 
     def __init__(self, image_size):

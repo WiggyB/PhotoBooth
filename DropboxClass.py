@@ -2,7 +2,7 @@ import dropbox
 from dropbox.files import WriteMode
 
 
-# An object that deals with uploading files to dropbox.
+# A wrapper around the dropbox module
 class DropboxObject:
 
     def __init__(self, token):

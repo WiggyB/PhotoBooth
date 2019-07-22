@@ -44,17 +44,17 @@ class PhotoBooth:
 
         self.merge_path = ''
 
-        nature_image = Image.open("nature.jpg")
+        nature_image = Image.open("images/nature.jpg")
         nature_preview = nature_image.resize(self.preview_size, Image.ANTIALIAS)
         nature_preview = ImageTk.PhotoImage(nature_preview)
         nature_full = nature_image.resize(self.image_size, Image.ANTIALIAS)
 
-        punk_image = Image.open("punk.jpg")
+        punk_image = Image.open("images/punk.jpg")
         punk_preview = punk_image.resize(self.preview_size, Image.ANTIALIAS)
         punk_preview = ImageTk.PhotoImage(punk_preview)
         punk_full = punk_image.resize(self.image_size, Image.ANTIALIAS)
 
-        space_image = Image.open("spacebackground.jpg")
+        space_image = Image.open("images/spacebackground.jpg")
         space_preview = space_image.resize(self.preview_size, Image.ANTIALIAS)
         space_preview = ImageTk.PhotoImage(space_preview)
         space_full = space_image.resize(self.image_size, Image.ANTIALIAS)

@@ -62,13 +62,13 @@ class PageTwo(tk.Frame):
         return_button = tk.Button(self, text="Return to start page", command=lambda: master.switch_frame(StartPage))
         return_button.pack(side="bottom")
 
-        left_arrow_img = tk.PhotoImage(file='arrowleft.png')
+        left_arrow_img = tk.PhotoImage(file='images/arrowleft.png')
         left_arrow_img = left_arrow_img.subsample(2, 2)
         left_button = tk.Button(self, image=left_arrow_img, command=lambda: self.change_background_image(-1))
         left_button.image = left_arrow_img
         left_button.pack(side="left")
 
-        right_arrow_img = tk.PhotoImage(file='arrowright.png')
+        right_arrow_img = tk.PhotoImage(file='images/arrowright.png')
         right_arrow_img = right_arrow_img.subsample(2, 2)
         right_button = tk.Button(self, image=right_arrow_img, command=lambda: self.change_background_image(1))
         right_button.image = right_arrow_img
@@ -92,7 +92,7 @@ class PageThree(tk.Frame):
         tk.Frame.__init__(self, master)
         self.countdown_images = []
         for x in range(3, 0, -1):
-            self.countdown_images.append(ImageTk.PhotoImage(Image.open(str(x) + '.png')))
+            self.countdown_images.append(ImageTk.PhotoImage(Image.open("images/" + str(x) + '.png')))
 
         self.count = 0
 

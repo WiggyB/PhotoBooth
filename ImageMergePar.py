@@ -1,6 +1,5 @@
 from PIL import Image
 import math
-import multiprocessing
 
 
 # Looks at each pixel to determine if it is part of the background or not. If it is it replaces it with the

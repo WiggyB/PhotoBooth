@@ -1,5 +1,6 @@
 import os
 import ImageMerge
+import ImageMergeMulti
 from PIL import Image, ImageTk
 
 # If running on Raspberry pi import proper classes, if not run Dummy classes
@@ -92,8 +93,7 @@ class PhotoBooth:
         f.close()
 
         # Send to image manipulation class
-        self.merge_path = ImageMerge.merge(image_path, self.backgrounds_full[self.background_choice],
-                                           self.image_size, progress_bar)
+        self.merge_path = ImageMergeMulti.merge(image_path, self.backgrounds_full[self.background_choice])
 
         self.dropbox.upload_picture(self.merge_path, self.dropbox_folder, self.picture_number)
         self.twitter.tweet_picture(self.merge_path, "Picture Number " + str(self.picture_number) + ". #KatieChris2019")

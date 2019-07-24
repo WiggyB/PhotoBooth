@@ -15,7 +15,7 @@ class App(tk.Tk):
 
         # Creates PhotoBoothClass object
         self.core = PhotoBoothClass.PhotoBooth()
-        #self.attributes('-fullscreen', True)
+        self.attributes('-fullscreen', True)
         self.title("Photo Booth")
         self.start = 0
         self.end = 0

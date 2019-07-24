@@ -16,10 +16,9 @@ def chroma_key(foreground_chunk, background_chunk ):
     return foreground_chunk
 
 
-def merge(path, background_path, progress_bar):
+def merge(path, background):
     # Load images
     foreground = Image.open("images/test_image.png")
-    background = Image.open(background_path)
     image_size = foreground.size
     output_img = Image.new("RGBA", image_size)
     chunk_size = int(image_size[0] / multiprocessing.cpu_count())

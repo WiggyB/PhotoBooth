@@ -4,6 +4,9 @@ import PhotoBoothClass
 from PIL import Image, ImageTk
 import time
 import threading
+import multiprocessing
+import logging
+
 
 
 # Master TK object
@@ -15,7 +18,7 @@ class App(tk.Tk):
 
         # Creates PhotoBoothClass object
         self.core = PhotoBoothClass.PhotoBooth()
-        self.attributes('-fullscreen', True)
+        # self.attributes('-fullscreen', True)
         self.title("Photo Booth")
         self.start = 0
         self.end = 0
@@ -149,7 +152,6 @@ class PageFour(tk.Frame):
 
     def threading_picture(self):
         app.core.take_picture(self, self.progress_bar)
-        return
 
     def process_complete(self):
         self.master.switch_frame(PageFive)
@@ -158,6 +160,7 @@ class PageFour(tk.Frame):
 class PageFive(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
+        print("path is: " + self.master.core.get_merge_path())
         processed_photo = Image.open(self.master.core.get_merge_path())
         processed_photo = processed_photo.resize((640, 360))
         processed_photo = ImageTk.PhotoImage(processed_photo)

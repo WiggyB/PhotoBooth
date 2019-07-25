@@ -1,7 +1,8 @@
 import os
-import ImageMerge
 import ImageMergeMulti
 from PIL import Image, ImageTk
+import multiprocessing
+import time
 
 # If running on Raspberry pi import proper classes, if not run Dummy classes
 if os.uname()[4][:3] == 'arm':
@@ -27,8 +28,9 @@ class PhotoBooth:
     image_size = (2592, 1944)
     preview_size = (300, 300)
 
-    def __init__(self):
+    def __init__(self, user_interface):
 
+        self.UI = user_interface
         self.twitter = TwitterClass.TwitterObject(token=self.token,
                                                   token_secret=self.token_secret,
                                                   consumer_key=self.consumer_key,
@@ -84,20 +86,32 @@ class PhotoBooth:
             f.close()
 
     # Takes the picture, sends it for processing and then sends relevant info to twitter and dropbox objects
-    def take_picture(self, frame, progress_bar):
+    def take_picture(self):
         self.picture_number += 1
+        print("Calling picture object: " + str(time.time() - self.UI.start))
         image_path = self.camera.take_picture(self.picture_number)
+        print("Picture object done: " + str(time.time() - self.UI.start))
 
         f = open('config.cfg', 'w')
         f.write(str(self.picture_number))
         f.close()
 
         # Send to image manipulation class
+        print("starting merge function: " + str(time.time() - self.UI.start))
         self.merge_path = ImageMergeMulti.merge(image_path, self.backgrounds_full[self.background_choice])
+        print("merge function finished: " + str(time.time() - self.UI.start))
+        dropbox_process = multiprocessing.Process(self.dropbox.upload_picture(self.merge_path, self.dropbox_folder,
+                                                                              self.picture_number))
+        twitter_process = multiprocessing.Process(self.twitter.tweet_picture(self.merge_path, "Picture Number " +
+                                                                             str(self.picture_number) +
+                                                                             ". #KatieChris2019"))
+        dropbox_process.start()
+        twitter_process.start()
 
-        self.dropbox.upload_picture(self.merge_path, self.dropbox_folder, self.picture_number)
-        self.twitter.tweet_picture(self.merge_path, "Picture Number " + str(self.picture_number) + ". #KatieChris2019")
-        frame.process_complete()
+        # self.dropbox.upload_picture(self.merge_path, self.dropbox_folder, self.picture_number)
+        # self.twitter.tweet_picture(self.merge_path, "Picture Number " + str(self.picture_number) +
+        #  ". #KatieChris2019")
+        # self.UI.frame.process_complete()
 
     def get_merge_path(self):
         return self.merge_path

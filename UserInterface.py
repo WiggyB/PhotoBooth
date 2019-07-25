@@ -3,33 +3,52 @@ from tkinter.ttk import Progressbar
 import PhotoBoothClass
 from PIL import Image, ImageTk
 import time
-import threading
 import multiprocessing
-import logging
-
+import threading
 
 
 # Master TK object
 class App(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
-        self._frame = None
+        self.frame = None
         self.switch_frame(StartPage)
 
         # Creates PhotoBoothClass object
-        self.core = PhotoBoothClass.PhotoBooth()
+        self.core = PhotoBoothClass.PhotoBooth(self)
         # self.attributes('-fullscreen', True)
         self.title("Photo Booth")
         self.start = 0
         self.end = 0
+        self.count = 0
 
     # Destroys current frame object and replaces it with a new one
     def switch_frame(self, frame_class):
         new_frame = frame_class(self)
-        if self._frame is not None:
-            self._frame.destroy()
-        self._frame = new_frame
-        self._frame.pack()
+        if self.frame is not None:
+            self.frame.destroy()
+        self.frame = new_frame
+        self.frame.pack()
+
+    # Starts the countdown to take the picture, changes displayed image
+    # the "after" method is used because time.sleep() would stop the TK mainloop as well, freezing the whole app
+    def countdown_timer(self):
+        if self.count == 3:
+            self.start = time.time()
+            print("starting: " + str(time.time() - self.start))
+            take_picture_thread = threading.Thread(target=self.core.take_picture())
+            print("starting take picture thread " + str(time.time() - self.start))
+            take_picture_thread.start()
+            take_picture_thread.join()
+            print("finished: " + str(time.time() - self.start))
+            self.switch_frame(PageFive)
+            return
+
+        self.frame.countdown_label.configure(image=self.frame.countdown_images[self.count])
+        self.frame.countdown_label.photo = self.frame.countdown_images[self.count]
+        self.frame.countdown_label.place(x=620, y=50)
+        self.count += 1
+        app.after(1000, self.countdown_timer)
 
 
 class StartPage(tk.Frame):
@@ -97,13 +116,11 @@ class PageThree(tk.Frame):
         for x in range(3, 0, -1):
             self.countdown_images.append(ImageTk.PhotoImage(Image.open("images/" + str(x) + '.png')))
 
-        self.count = 0
-
         # Creating canvas. A canvas is used so we can use the place manager.
         # This is required due to the preview screen being shown above the GUI
         self.w = tk.Canvas(self, bg='pink', width=800, height=480)
         self.w.pack()
-        self.ready_button = tk.Button(self.w, text="Begin \nCountdown", command=lambda: self.countdown())
+        self.ready_button = tk.Button(self.w, text="Begin \nCountdown", command=lambda: app.after(0, self.master.countdown_timer))
         self.ready_button.config(height=15, width=17)
         self.ready_button.place(x=640, y=50)
         self.back_button = tk.Button(self.w, text="Back", command=lambda: [app.switch_frame(PageTwo),
@@ -111,50 +128,27 @@ class PageThree(tk.Frame):
         self.back_button.config(height=5, width=17)
         self.back_button.place(x=640, y=330)
         self.countdown_label = tk.Label(self.w, image=self.countdown_images[0], bg='pink', height=400, width=200)
-        app.core.camera.open_window()
-
-    def countdown(self):
-
-        # Starts the countdown to take the picture, changes displayed image
-        # the "after" method is used because time.sleep() would stop the TK mainloop as well, freezing the whole app
-        def countdown_timer():
-            if self.count == 3:
-                self.master.start = time.time()
-                self.master.switch_frame(PageFour)
-                return
-
-            self.countdown_label.configure(image=self.countdown_images[self.count])
-            self.countdown_label.photo = self.countdown_images[self.count]
-            self.countdown_label.place(x=620, y=50)
-            self.count += 1
-            app.after(1000, countdown_timer)
-
-        self.ready_button.place_forget()
-        self.back_button.place_forget()
-        self.countdown_label.place(x=640, y=50)
-        app.after(0, countdown_timer)
-
-
-class PageFour(tk.Frame):
-    def __init__(self, master):
-        tk.Frame.__init__(self, master)
-        self.w = tk.Canvas(self, bg='pink', width=800, height=480)
-        self.w.pack()
         self.progress_bar = Progressbar(self, orient=tk.HORIZONTAL, length=500, mode='determinate',
                                         maximum=self.master.core.image_size[1])
-        self.progress_bar.place(relx=0.5, rely=0.5, anchor='center')
+        #self.progress_bar.place(relx=0.5, rely=0.5, anchor='center')
+        app.core.camera.open_window()
 
-        self.quitButton = tk.Button(self.w, text="Quit", command=master.quit, pady=20, padx=20)
-        self.quitButton.place(relx=0.5, rely=0.7, anchor='center')
 
-        # Starts the Image processing in a separate thread so the GUI is responsive
-        threading.Thread(target=self.threading_picture).start()
-
-    def threading_picture(self):
-        app.core.take_picture(self, self.progress_bar)
-
-    def process_complete(self):
-        self.master.switch_frame(PageFive)
+# class PageFour(tk.Frame):
+#     def __init__(self, master):
+#         tk.Frame.__init__(self, master)
+#         self.w = tk.Canvas(self, bg='pink', width=800, height=480)
+#         self.w.pack()
+#
+#
+#         self.quitButton = tk.Button(self.w, text="Quit", command=master.quit, pady=20, padx=20)
+#         self.quitButton.place(relx=0.5, rely=0.7, anchor='center')
+#         print("finished: " + str(time.time() - self.master.start))
+#         # Starts the Image processing in a separate thread so the GUI is responsive
+#         # threading.Thread(target=self.threading_picture).start()
+#
+#     # def threading_picture(self):
+#         # app.core.take_picture(self, self.progress_bar)
 
 
 class PageFive(tk.Frame):

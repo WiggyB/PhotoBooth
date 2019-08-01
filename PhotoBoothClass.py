@@ -2,7 +2,6 @@ import os
 import ImageMergeMulti
 from PIL import Image, ImageTk
 import multiprocessing
-import time
 
 # If running on Raspberry pi import proper classes, if not run Dummy classes
 if os.uname()[4][:3] == 'arm':
@@ -25,12 +24,12 @@ class PhotoBooth:
     token_secret = "6qFafsqUFPwUKtljd5WYGvt1xTtfUMYJH5UYuLzCj7inF"
     consumer_key = "wQy0diWcyl1G4GP4eF1arBPtS"
     consumer_secret = "B3JsT7UuB57ncKhZD174iR6k3kQ8lhKa6xj51h9i9l0mfO7S8F"
-    image_size = (2592, 1944)
+    image_size = (1920, 1080)
+    # image_size = (2592, 1944)
     preview_size = (300, 300)
 
-    def __init__(self, user_interface):
+    def __init__(self):
 
-        self.UI = user_interface
         self.twitter = TwitterClass.TwitterObject(token=self.token,
                                                   token_secret=self.token_secret,
                                                   consumer_key=self.consumer_key,
@@ -42,11 +41,9 @@ class PhotoBooth:
         self.background_choice = 0
         self.backgrounds_preview = []
         self.backgrounds_full = []
-
         self.ImageNumber = 0
-
         self.merge_path = ''
-
+        self.merged_image = None
         nature_image = Image.open("images/nature.jpg")
         nature_preview = nature_image.resize(self.preview_size, Image.ANTIALIAS)
         nature_preview = ImageTk.PhotoImage(nature_preview)
@@ -86,32 +83,28 @@ class PhotoBooth:
             f.close()
 
     # Takes the picture, sends it for processing and then sends relevant info to twitter and dropbox objects
-    def take_picture(self):
+    def take_picture(self, user_interface):
         self.picture_number += 1
-        print("Calling picture object: " + str(time.time() - self.UI.start))
-        image_path = self.camera.take_picture(self.picture_number)
-        print("Picture object done: " + str(time.time() - self.UI.start))
-
+        image = self.camera.take_picture()
         f = open('config.cfg', 'w')
         f.write(str(self.picture_number))
         f.close()
 
         # Send to image manipulation class
-        print("starting merge function: " + str(time.time() - self.UI.start))
-        self.merge_path = ImageMergeMulti.merge(image_path, self.backgrounds_full[self.background_choice])
-        print("merge function finished: " + str(time.time() - self.UI.start))
-        dropbox_process = multiprocessing.Process(self.dropbox.upload_picture(self.merge_path, self.dropbox_folder,
-                                                                              self.picture_number))
-        twitter_process = multiprocessing.Process(self.twitter.tweet_picture(self.merge_path, "Picture Number " +
+        self.merged_image = ImageMergeMulti.merge(image, self.backgrounds_full[self.background_choice])
+        user_interface.app.set_merged_image(self.merged_image)
+        user_interface.app.show_picture()
+        dropbox_process1 = multiprocessing.Process(self.dropbox.upload_picture(self.merged_image,
+                                                                               self.dropbox_folder,
+                                                                               self.picture_number))
+        dropbox_process2 = multiprocessing.Process(self.dropbox.upload_picture(image, self.dropbox_folder,
+                                                                                str(self.picture_number) + "RAW"))
+        twitter_process = multiprocessing.Process(self.twitter.tweet_picture(self.merged_image, "Picture Number " +
                                                                              str(self.picture_number) +
                                                                              ". #KatieChris2019"))
-        dropbox_process.start()
+        dropbox_process1.start()
+        dropbox_process2.start()
         twitter_process.start()
-
-        # self.dropbox.upload_picture(self.merge_path, self.dropbox_folder, self.picture_number)
-        # self.twitter.tweet_picture(self.merge_path, "Picture Number " + str(self.picture_number) +
-        #  ". #KatieChris2019")
-        # self.UI.frame.process_complete()
 
     def get_merge_path(self):
         return self.merge_path

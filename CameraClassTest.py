@@ -1,3 +1,5 @@
+from PIL import Image, ImageTk
+
 
 class CameraObject:
 
@@ -11,5 +13,6 @@ class CameraObject:
     def close_window(self):
         return
 
-    def take_picture(self, number):
-        return '/home/chris/Desktop/TM470 Project/images/test_image.jpg'
+    def take_picture(self):
+
+        return Image.open('/home/chris/Desktop/TM470 Project/images/test_image.jpg')

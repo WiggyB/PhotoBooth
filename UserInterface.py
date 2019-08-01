@@ -3,8 +3,40 @@ from tkinter.ttk import Progressbar
 import PhotoBoothClass
 from PIL import Image, ImageTk
 import time
-import multiprocessing
 import threading
+
+
+class TkThread:
+    def __init__(self):
+        self.app = App()
+        #self.message_queue = queue.Queue()
+        #self.message_event = '<<message>>'
+        #self.app.bind(self.message_event, self.process_message_queue)
+
+    def run_tk(self):
+        self.app.mainloop()
+
+    def send_message_to_ui(self, message):
+        #self.message_queue.put(message)
+        #self.app.event_generate(self.message_event, when='tail')
+        return
+
+    def process_message_queue(self, event):
+        #while self.message_queue.empty() is False:
+        #    message = self.message_queue.get(block=False)
+        #    # process the message here
+        return
+
+
+class BackgroundThread:
+
+    def __init__(self, ui_thread):
+        self.tk_thread = ui_thread
+        self.thread = threading.Thread(target=self.run_thread)
+        self.thread.start()
+
+    def run_thread(self):
+        photo_booth.take_picture(self.tk_thread)
 
 
 # Master TK object
@@ -14,13 +46,15 @@ class App(tk.Tk):
         self.frame = None
         self.switch_frame(StartPage)
 
-        # Creates PhotoBoothClass object
-        self.core = PhotoBoothClass.PhotoBooth(self)
         # self.attributes('-fullscreen', True)
         self.title("Photo Booth")
         self.start = 0
         self.end = 0
         self.count = 0
+        self.merged_image = None
+
+    def set_merged_image(self, image):
+        self.merged_image = image
 
     # Destroys current frame object and replaces it with a new one
     def switch_frame(self, frame_class):
@@ -35,26 +69,24 @@ class App(tk.Tk):
     def countdown_timer(self):
         if self.count == 3:
             self.start = time.time()
-            print("starting: " + str(time.time() - self.start))
-            take_picture_thread = threading.Thread(target=self.core.take_picture())
-            print("starting take picture thread " + str(time.time() - self.start))
-            take_picture_thread.start()
-            take_picture_thread.join()
-            print("finished: " + str(time.time() - self.start))
-            self.switch_frame(PageFive)
+            self.switch_frame(PageFour)
+            self.count = 0
             return
 
         self.frame.countdown_label.configure(image=self.frame.countdown_images[self.count])
         self.frame.countdown_label.photo = self.frame.countdown_images[self.count]
         self.frame.countdown_label.place(x=620, y=50)
         self.count += 1
-        app.after(1000, self.countdown_timer)
+        self.after(1000, self.countdown_timer)
+
+    # Called by background thread to move to next frame
+    def show_picture(self):
+        self.switch_frame(PageFive)
 
 
 class StartPage(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-
         tk.Label(self, text="Press Start to Begin").pack(side="top", pady=11, padx=10)
         tk.Button(self, pady=50, text="Start",
                   command=lambda: master.switch_frame(PageOne)).pack()
@@ -96,17 +128,17 @@ class PageTwo(tk.Frame):
         right_button.image = right_arrow_img
         right_button.pack(side="right")
 
-        self.label = tk.Label(self, image=master.core.backgrounds_preview[master.core.ImageNumber])
-        self.label.image = master.core.backgrounds_preview[master.core.ImageNumber]
+        self.label = tk.Label(self, image=photo_booth.backgrounds_preview[photo_booth.ImageNumber])
+        self.label.image = photo_booth.backgrounds_preview[photo_booth.ImageNumber]
         self.label.pack()
 
     def change_background_image(self, choice):
-        app.core.background_choice += choice
-        if app.core.background_choice == len(self.master.core.backgrounds_preview):
-            app.core.background_choice = 0
-        if app.core.background_choice == -1:
-            app.core.background_choice = len(self.master.core.backgrounds_preview)-1
-        self.label.configure(image=self.master.core.backgrounds_preview[app.core.background_choice])
+        photo_booth.background_choice += choice
+        if photo_booth.background_choice == len(photo_booth.backgrounds_preview):
+            photo_booth.background_choice = 0
+        if photo_booth.background_choice == -1:
+            photo_booth.background_choice = len(photo_booth.backgrounds_preview)-1
+        self.label.configure(image=photo_booth.backgrounds_preview[photo_booth.background_choice])
 
 
 class PageThree(tk.Frame):
@@ -120,49 +152,48 @@ class PageThree(tk.Frame):
         # This is required due to the preview screen being shown above the GUI
         self.w = tk.Canvas(self, bg='pink', width=800, height=480)
         self.w.pack()
-        self.ready_button = tk.Button(self.w, text="Begin \nCountdown", command=lambda: app.after(0, self.master.countdown_timer))
+        self.ready_button = tk.Button(self.w, text="Begin \nCountdown", command=lambda: self.master.after(0, self.master.countdown_timer))
         self.ready_button.config(height=15, width=17)
         self.ready_button.place(x=640, y=50)
-        self.back_button = tk.Button(self.w, text="Back", command=lambda: [app.switch_frame(PageTwo),
+        self.back_button = tk.Button(self.w, text="Back", command=lambda: [self.master.switch_frame(PageTwo),
                                                                            self.w.delete("all")])
         self.back_button.config(height=5, width=17)
         self.back_button.place(x=640, y=330)
         self.countdown_label = tk.Label(self.w, image=self.countdown_images[0], bg='pink', height=400, width=200)
-        self.progress_bar = Progressbar(self, orient=tk.HORIZONTAL, length=500, mode='determinate',
-                                        maximum=self.master.core.image_size[1])
-        #self.progress_bar.place(relx=0.5, rely=0.5, anchor='center')
-        app.core.camera.open_window()
+        photo_booth.camera.open_window()
 
 
-# class PageFour(tk.Frame):
-#     def __init__(self, master):
-#         tk.Frame.__init__(self, master)
-#         self.w = tk.Canvas(self, bg='pink', width=800, height=480)
-#         self.w.pack()
-#
-#
-#         self.quitButton = tk.Button(self.w, text="Quit", command=master.quit, pady=20, padx=20)
-#         self.quitButton.place(relx=0.5, rely=0.7, anchor='center')
-#         print("finished: " + str(time.time() - self.master.start))
-#         # Starts the Image processing in a separate thread so the GUI is responsive
-#         # threading.Thread(target=self.threading_picture).start()
-#
-#     # def threading_picture(self):
-#         # app.core.take_picture(self, self.progress_bar)
+class PageFour(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.w = tk.Canvas(self, bg='pink', width=800, height=480)
+        self.w.pack()
+        self.progress_bar = Progressbar(self, orient=tk.HORIZONTAL, length=500, mode='indeterminate')
+        self.progress_bar.place(relx=0.5, rely=0.5, anchor='center')
+        self.progress_bar.start()
+        self.quitButton = tk.Button(self.w, text="Quit", command=master.quit, pady=20, padx=20)
+        self.quitButton.place(relx=0.5, rely=0.7, anchor='center')
+        self.master.after(0, self.threading_picture)
+        # Starts the Image processing in a separate thread so the GUI is responsive
+        # threading.Thread(target=self.threading_picture).start()
+
+    @staticmethod
+    def threading_picture():
+        BackgroundThread(tk_thread)
 
 
 class PageFive(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
-        print("path is: " + self.master.core.get_merge_path())
-        processed_photo = Image.open(self.master.core.get_merge_path())
-        processed_photo = processed_photo.resize((640, 360))
-        processed_photo = ImageTk.PhotoImage(processed_photo)
+        #processed_photo = Image.open(self.master.core.get_merge_path())
+        self.master.merged_image = self.master.merged_image.resize((640, 360))
+        self.master.merged_image = ImageTk.PhotoImage(self.master.merged_image)
+        #processed_photo = processed_photo.resize((640, 360))
 
-        self.picture = tk.Label(self, image=processed_photo)
-        self.picture.image = processed_photo
+        self.picture = tk.Label(self, image=self.master.merged_image)
+        self.picture.image = self.master.merged_image
         self.picture.pack()
-        self.start_button = tk.Button(self, text="Start Again", command=master.switch_frame(StartPage),
+        self.start_button = tk.Button(self, text="Start Again", command=lambda: master.switch_frame(StartPage),
                                       pady=20, padx=20)
         self.start_button.pack()
         self.quit_button = tk.Button(self, text="Quit", command=master.quit, pady=20, padx=20)
@@ -171,5 +202,8 @@ class PageFive(tk.Frame):
 
 # Start main loop
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    tk_thread = TkThread()
+    photo_booth = PhotoBoothClass.PhotoBooth() # Creates PhotoBoothClass object
+
+    tk_thread.run_tk()  # initiate last, since this runs tk.main_loop() which is a blocking call
+

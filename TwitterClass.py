@@ -1,4 +1,5 @@
 from twitter import *
+import io
 
 
 # A wrapper around the twitter module
@@ -16,8 +17,11 @@ class TwitterObject:
 
     # image is a string path to location of image file
     def tweet_picture(self, image, text):
-        with open(image, "rb") as image_file:
-            image_data = image_file.read()
-        id_img = self.t_upload.media.upload(media=image_data)["media_id_string"]
-
-        self.t_tweet.statuses.update(status=text, media_ids=id_img)
+        try:
+            img_byte = io.BytesIO()
+            image.save(img_byte, format='PNG')
+            img_byte = img_byte.getvalue()
+            id_img = self.t_upload.media.upload(media=img_byte)["media_id_string"]
+            self.t_tweet.statuses.update(status=text, media_ids=id_img)
+        except:
+            pass

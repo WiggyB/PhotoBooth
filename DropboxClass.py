@@ -19,6 +19,6 @@ class DropboxObject:
             self.dbx.files_upload(img_byte, '/' + path + '/image_' + str(image_number) + '.png',
                                   mode=dropbox.files.WriteMode.add)
         except:
-            image.save('/' + path + '/image_' + str(image_number) + '.png', "png")
+            image.save('image_' + str(image_number) + '.png', "png")
 
 

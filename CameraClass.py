@@ -7,8 +7,6 @@ from PIL import Image
 class CameraObject:
 
     def __init__(self, image_size):
-        # Stream object that the raw image will; be temp stored in
-        self.stream = io.BytesIO()
         self.camera = PiCamera()
         self.camera.rotation = 200
         self.camera.resolution = image_size
@@ -22,6 +20,7 @@ class CameraObject:
 
     def take_picture(self):
         self.close_window()
-        self.camera.capture(self.stream, format='png')
-        self.stream.seek(0)
-        return Image.open(self.stream)
+        stream = io.BytesIO()
+        self.camera.capture(stream, format='png')
+        stream.seek(0)
+        return Image.open(stream)

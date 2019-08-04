@@ -25,6 +25,7 @@ def chroma_key(chunks_list):
 def merge(foreground, background):
 
     start = time.time()
+    print("starting merge")
     number_of_chunks = multiprocessing.cpu_count() * 8
     # Load images
     image_size = foreground.size
@@ -51,6 +52,6 @@ def merge(foreground, background):
     # Reassemble chunks
     for c in range(number_of_chunks):
         output_img.paste(result[c], (chunk_size*c, 0, chunk_size*(c + 1), image_size[1]))
-
+    print("pictures merged: " + str(start - time.time()))
     return output_img
 

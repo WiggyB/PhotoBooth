@@ -19,6 +19,7 @@ class DropboxObject:
             self.dbx.files_upload(img_byte, '/' + path + '/image_' + str(image_number) + '.png',
                                   mode=dropbox.files.WriteMode.add)
         except:
+            print("A DROPBOX EXECPTION HAS OCCURED")
             image.save('image_' + str(image_number) + '.png', "png")
 
 

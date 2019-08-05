@@ -24,4 +24,5 @@ class TwitterObject:
             id_img = self.t_upload.media.upload(media=img_byte)["media_id_string"]
             self.t_tweet.statuses.update(status=text, media_ids=id_img)
         except:
+            print("A TWITTER EXECPTION HAS OCCURED")
             pass

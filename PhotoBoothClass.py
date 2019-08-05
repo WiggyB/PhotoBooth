@@ -2,7 +2,6 @@ import os
 import ImageMergeMulti
 from PIL import Image, ImageTk
 import multiprocessing
-import time
 
 # If running on Raspberry pi import proper classes, if not run Dummy classes
 if os.uname()[4][:3] == 'arm':
@@ -28,7 +27,7 @@ class PhotoBooth:
     # image_size = (1920, 1080)
     preview_ratio = 5
     image_size = (2592, 1944)
-    preview_size = (640, 480)
+    preview_size = (500, 375)
 
     def __init__(self):
 
@@ -48,35 +47,18 @@ class PhotoBooth:
         self.merge_path = ''
         self.image = None
 
-        nature_image = Image.open("images/nature.jpg")
-        nature_select = nature_image.resize((int(nature_image.size[0]/self.preview_ratio), int(nature_image.size[1]/self.preview_ratio)), Image.ANTIALIAS)
-        nature_select = ImageTk.PhotoImage(nature_select)
-        nature_full = nature_image.resize(self.image_size, Image.ANTIALIAS)
-        nature_preview = nature_image.resize(self.preview_size, Image.ANTIALIAS)
+        images = ["images/nature.jpg", "images/punk.jpg", "images/spacebackground.jpg"]
 
-        punk_image = Image.open("images/punk.jpg")
-        punk_select = punk_image.resize((int(punk_image.size[0]/self.preview_ratio), int(punk_image.size[1]/self.preview_ratio)), Image.ANTIALIAS)
-        punk_select = ImageTk.PhotoImage(punk_select)
-        punk_full = punk_image.resize(self.image_size, Image.ANTIALIAS)
-        punk_preview = punk_image.resize(self.preview_size, Image.ANTIALIAS)
-
-        space_image = Image.open("images/spacebackground.jpg")
-        space_select = space_image.resize((int(space_image.size[0]/self.preview_ratio), int(space_image.size[1]/self.preview_ratio)), Image.ANTIALIAS)
-        space_select = ImageTk.PhotoImage(space_select)
-        space_full = space_image.resize(self.image_size, Image.ANTIALIAS)
-        space_preview = space_image.resize(self.preview_size, Image.ANTIALIAS)
-
-        self.backgrounds_select.append(nature_select)
-        self.backgrounds_select.append(punk_select)
-        self.backgrounds_select.append(space_select)
-
-        self.backgrounds_full.append(nature_full)
-        self.backgrounds_full.append(punk_full)
-        self.backgrounds_full.append(space_full)
-
-        self.backgrounds_preview.append(nature_preview)
-        self.backgrounds_preview.append(punk_preview)
-        self.backgrounds_preview.append(space_preview)
+        for image in images:
+            data = Image.open(image)
+            select_image = data.resize((int(data.size[0]/self.preview_ratio), int(data.size[1]/self.preview_ratio)),
+                                       Image.ANTIALIAS)
+            select_image = ImageTk.PhotoImage(select_image)
+            full_image = data.resize(self.image_size, Image.ANTIALIAS)
+            preview_image = data.resize(self.preview_size, Image.ANTIALIAS)
+            self.backgrounds_select.append(select_image)
+            self.backgrounds_full.append(full_image)
+            self.backgrounds_preview.append(preview_image)
 
         # Config file will hold any data that needs to be saved, currently only picture number is stored
         # Will use later to store info about images that haven't been uploaded yet, in case of an internet outage
@@ -97,8 +79,8 @@ class PhotoBooth:
         self.picture_number += 1
         self.image = self.camera.take_picture()
         preview_image = self.image.resize(self.preview_size, Image.ANTIALIAS)
-        print("take picture background choice:" + str(self.background_choice))
         merged_preview = ImageMergeMulti.merge(preview_image, self.backgrounds_preview[self.background_choice])
+        print(str(merged_preview.size))
         user_interface.app.set_merged_preview(merged_preview)
         user_interface.app.show_picture()
 
@@ -113,7 +95,7 @@ class PhotoBooth:
                                                                                self.dropbox_folder,
                                                                                self.picture_number))
         dropbox_process2 = multiprocessing.Process(self.dropbox.upload_picture(self.image, self.dropbox_folder,
-                                                                                str(self.picture_number) + "RAW"))
+                                                                               str(self.picture_number) + "RAW"))
         twitter_process = multiprocessing.Process(self.twitter.tweet_picture(merged_image, "Picture Number " +
                                                                              str(self.picture_number) +
                                                                              ". #KatieChris2019"))

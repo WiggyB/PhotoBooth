@@ -2,12 +2,6 @@ from PIL import Image
 import multiprocessing
 import math
 import time
-import logging
-#from multiprocessing import log_to_stderr, get_logger
-
-#log_to_stderr()
-#logger = get_logger()
-#logger.setLevel(logging.INFO)
 
 
 def chroma_key(chunks_list):
@@ -54,4 +48,3 @@ def merge(foreground, background):
         output_img.paste(result[c], (chunk_size*c, 0, chunk_size*(c + 1), image_size[1]))
     print("pictures merged: " + str(start - time.time()))
     return output_img
-

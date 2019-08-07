@@ -24,3 +24,4 @@ class CameraObject:
         self.camera.capture(stream, format='png')
         stream.seek(0)
         return Image.open(stream)
+

@@ -21,5 +21,3 @@ class DropboxObject:
         except:
             print("A DROPBOX EXECPTION HAS OCCURED")
             image.save('image_' + str(image_number) + '.png', "png")
-
-

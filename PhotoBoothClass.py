@@ -24,10 +24,9 @@ class PhotoBooth:
     token_secret = "6qFafsqUFPwUKtljd5WYGvt1xTtfUMYJH5UYuLzCj7inF"
     consumer_key = "wQy0diWcyl1G4GP4eF1arBPtS"
     consumer_secret = "B3JsT7UuB57ncKhZD174iR6k3kQ8lhKa6xj51h9i9l0mfO7S8F"
-    # image_size = (1920, 1080)
     preview_ratio = 5
     image_size = (2592, 1944)
-    preview_size = (500, 375)
+    preview_size = (640, 480)
 
     def __init__(self):
 
@@ -78,14 +77,17 @@ class PhotoBooth:
     def take_picture(self, user_interface):
         self.picture_number += 1
         self.image = self.camera.take_picture()
+        print('taken picture')
         preview_image = self.image.resize(self.preview_size, Image.ANTIALIAS)
         merged_preview = ImageMergeMulti.merge(preview_image, self.backgrounds_preview[self.background_choice])
-        print(str(merged_preview.size))
-        user_interface.app.set_merged_preview(merged_preview)
-        user_interface.app.show_picture()
+        print("merged preview")
+        user_interface.set_merged_preview(merged_preview)
+        print('triggering show_picture')
+        user_interface.show_picture()
+        print('triggered show_picture')
 
     # Takes the picture, sends it for processing and then sends relevant info to twitter and dropbox objects
-    def accept_picture(self):
+    def accept_picture(self, user_interface):
         # Send to image manipulation class
         f = open('config.cfg', 'w')
         f.write(str(self.picture_number))
@@ -103,4 +105,5 @@ class PhotoBooth:
 
         for process in processes:
             process.start()
-            print("process started")
+        user_interface.num_of_processes -= 1
+        print("upload processes started")

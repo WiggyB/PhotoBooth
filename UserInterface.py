@@ -6,7 +6,6 @@ import threading
 import time
 
 
-
 class BackgroundThread:
 
     def __init__(self, ui_thread, kind):

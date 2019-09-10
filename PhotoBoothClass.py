@@ -102,4 +102,3 @@ class PhotoBooth:
 
         for process in processes:
             process.start()
-

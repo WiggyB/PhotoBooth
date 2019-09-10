@@ -42,7 +42,7 @@ class PhotoBooth:
         self.backgrounds_select = []
         self.backgrounds_full = []
         self.backgrounds_preview = []
-        self.ImageNumber = 0
+        self.imageNumber = 0
         self.merge_path = ''
         self.image = None
 
@@ -74,20 +74,17 @@ class PhotoBooth:
             f.write(str(self.picture_number))
             f.close()
 
+    # Takes picture and starts the process for creating the preview image
     def take_picture(self, user_interface):
         self.picture_number += 1
         self.image = self.camera.take_picture()
-        print('taken picture')
         preview_image = self.image.resize(self.preview_size, Image.ANTIALIAS)
         merged_preview = ImageMergeMulti.merge(preview_image, self.backgrounds_preview[self.background_choice])
-        print("merged preview")
         user_interface.set_merged_preview(merged_preview)
-        print('triggering show_picture')
         user_interface.show_picture()
-        print('triggered show_picture')
 
     # Takes the picture, sends it for processing and then sends relevant info to twitter and dropbox objects
-    def accept_picture(self, user_interface):
+    def accept_picture(self):
         # Send to image manipulation class
         f = open('config.cfg', 'w')
         f.write(str(self.picture_number))
@@ -100,10 +97,9 @@ class PhotoBooth:
                                                                                str(self.picture_number) + "RAW"))
         twitter_process = multiprocessing.Process(self.twitter.tweet_picture(merged_image, "Picture Number " +
                                                                              str(self.picture_number) +
-                                                                             ". #KatieChris2019"))
+                                                                             ". #KatieChris2019", self.picture_number))
         processes = [dropbox_process1, dropbox_process2, twitter_process]
 
         for process in processes:
             process.start()
-        user_interface.num_of_processes -= 1
-        print("upload processes started")
+

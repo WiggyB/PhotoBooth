@@ -8,5 +8,5 @@ class TwitterObject:
         self.consumer_secret = consumer_secret
 
     # image is a string path to location of image file
-    def tweet_picture(self, image, text):
+    def tweet_picture(self, image, text, image_number):
         return

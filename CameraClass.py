@@ -20,6 +20,7 @@ class CameraObject:
 
     def take_picture(self):
         self.close_window()
+        # Creates the image as a Bytes object so it can stay in RAM instead of being saved to disk
         stream = io.BytesIO()
         self.camera.capture(stream, format='png')
         stream.seek(0)

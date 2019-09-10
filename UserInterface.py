@@ -3,9 +3,10 @@ from tkinter.ttk import Progressbar, Style
 import PhotoBoothClass
 from PIL import Image, ImageTk
 import threading
-import time
+import os
 
 
+# Object that processes images in the background, allowing concurrency
 class BackgroundThread:
 
     def __init__(self, ui_thread, kind):
@@ -13,23 +14,17 @@ class BackgroundThread:
         self.kind = kind
         self.tk_thread = ui_thread
         if kind == "preview":
-            print('preview object created, inside object')
             self.thread = threading.Thread(target=self.run_preview_thread)
-            print("preview process started")
             self.thread.start()
         else:
             self.thread = threading.Thread(target=self.run_full_thread)
-            print("full process started")
             self.thread.start()
 
     def run_preview_thread(self):
         photo_booth.take_picture(self.tk_thread)
 
     def run_full_thread(self):
-        photo_booth.accept_picture(self.tk_thread)
-
-    def __del__(self):
-        print(self.kind + " object deleted")
+        photo_booth.accept_picture()
 
 
 # Master TK object
@@ -40,14 +35,15 @@ class App(tk.Tk):
         self.button_font = ('dyuthi', 30, 'bold')
         self.frame = None
         self.attributes('-fullscreen', True)
-        # self.config(cursor='none')
+        # Makes cursor invisible on Raspberry Pi
+        if os.uname()[4][:3] == 'arm':
+            self.config(cursor='none')
         self.title("Photo Booth")
         self.count = 0
         self.merged_image = None
         self.bg_colour = "#666B6A"  # icon colour #660099 need to make the icons
         self.text_colour = '#660099'
         self.button_bg_colour = "#8D5A97"
-        self.num_of_processes = 0
 
         self.countdown_images = []
         for x in range(3, 0, -1):
@@ -71,7 +67,6 @@ class App(tk.Tk):
     # the "after" method is used because time.sleep() would stop the TK mainloop as well, freezing the whole app
     def countdown_timer(self):
         if self.count == 3:
-            print("switching to frame 4, inside countdown timer")
             self.switch_frame(PageFour)
             self.count = 0
             return
@@ -80,7 +75,7 @@ class App(tk.Tk):
         self.frame.countdown_label.photo = self.countdown_images[self.count]
         self.frame.countdown_label.place(x=620, y=50)
         self.count += 1
-        self.after(1000, self.countdown_timer)
+        self.after(1500, self.countdown_timer)
 
     # Called by background thread to move to next frame
     def show_picture(self):
@@ -89,7 +84,6 @@ class App(tk.Tk):
 
 class StartPage(tk.Frame):
     def __init__(self, master):
-        print(str(master.num_of_processes))
         tk.Frame.__init__(self, master, bg=master.bg_colour)
         self.label = tk.Label(self, text="Press Start to Begin", bg=master.bg_colour, fg=master.text_colour)
         self.label.pack(side="top", expand=True, fill='both')
@@ -99,12 +93,6 @@ class StartPage(tk.Frame):
                                       relief="flat", activebackground=master.bg_colour, image=start_img,
                                       command=lambda: master.switch_frame(PageOne))
         self.start_button.image = start_img
-        #self.process_label = tk.Label(self, text="Processesing", bg=master.bg_colour, fg=master.text_colour)
-
-        if master.num_of_processes > 3:
-            #self.process_label.pack(side="left", expand=True, fill="both")
-            while master.num_of_processes > 3:
-                continue
         self.start_button.pack(side="left", expand=True, fill="both")
 
 
@@ -162,11 +150,12 @@ class PageTwo(tk.Frame):
         self.right_button.image = right_arrow_img
         self.right_button.pack(side="right")
 
-        self.image = tk.Button(self.select_canvas, borderwidth=0, relief='flat', bg=master.bg_colour, image=photo_booth.backgrounds_select[photo_booth.ImageNumber],
+        self.image = tk.Button(self.select_canvas, borderwidth=0, relief='flat', bg=master.bg_colour, image=photo_booth.backgrounds_select[photo_booth.imageNumber],
                                highlightthickness=0, activebackground=master.bg_colour, command=lambda: master.switch_frame(PageThree))
-        self.image.image = photo_booth.backgrounds_select[photo_booth.ImageNumber]
+        self.image.image = photo_booth.backgrounds_select[photo_booth.imageNumber]
         self.image.pack()
 
+    # Records selection of background image and updates display
     def change_background_image(self, choice):
         photo_booth.background_choice += choice
         if photo_booth.background_choice == len(photo_booth.backgrounds_select):
@@ -194,6 +183,7 @@ class PageThree(tk.Frame):
         self.back_button.place(x=656, y=330)
         self.countdown_label = tk.Label(self, image=master.countdown_images[0], bg=master.bg_colour,
                                         height=500, width=200)
+        # Creates preview window
         photo_booth.camera.open_window()
 
 
@@ -203,15 +193,16 @@ class PageFour(tk.Frame):
         s = Style()
         s.theme_use('clam')
         s.configure("purple.Horizontal.TProgressbar", foreground=master.bg_colour, background='#660099')
-        self.progress_bar = Progressbar(self, style="purple.Horizontal.TProgressbar", orient=tk.HORIZONTAL, length=500, mode='indeterminate')
+        self.license_text = tk.Label(self, text="Icon made by Freepik from www.flaticon.com", bg=master.bg_colour)
+        self.license_text.place(relx=0.5, rely=0.9, anchor='center')
+        self.progress_bar = Progressbar(self, style="purple.Horizontal.TProgressbar", orient=tk.HORIZONTAL, length=500,
+                                        mode='indeterminate')
         self.progress_bar.place(relx=0.5, rely=0.5, anchor='center')
         self.progress_bar.start()
         self.master.after(0, self.threading_picture_preview)
 
     # Starts the Image processing in a separate object so the GUI is responsive
     def threading_picture_preview(self):
-        print("creating background thread, in page four")
-        self.master.num_of_processes += 1
         BackgroundThread(self.master, "preview")
 
 
@@ -243,7 +234,6 @@ class PageFive(tk.Frame):
 
     # Starts the Image processing in a separate object so the GUI is responsive
     def threading_picture_full(self):
-        self.master.num_of_processes += 1
         BackgroundThread(self.master, "full")
 
 

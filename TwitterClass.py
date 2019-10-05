@@ -35,6 +35,7 @@ class TwitterObject:
             if os.stat("twitter_uploads.cfg").st_size != 0:
                 self.try_uploads()
 
+        # Records any failed uploads in cfg file
         except Exception as e:
             print(e)
             image.save('twitter_image_' + str(image_number) + '.png', "png")
@@ -43,6 +44,7 @@ class TwitterObject:
             f.write(text + '\n')
             f.close()
 
+    # Attempts to upload any stored, failed uploads
     def try_uploads(self):
         f = open('twitter_uploads.cfg', 'r')
         lines = f.readlines()

@@ -39,6 +39,7 @@ class DropboxObject:
             f.write('/' + path + '/dropbox_image_' + str(image_number) + '.png\n')
             f.close()
 
+    # Attempts to upload any stored, failed uploads
     def try_uploads(self):
         f = open('dropbox_uploads.cfg', 'r')
         lines = f.readlines()

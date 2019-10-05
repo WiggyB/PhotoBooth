@@ -123,7 +123,8 @@ class PageTwo(tk.Frame):
         self.button_canvas.pack(side='top', fill='x')
         self.select_canvas = tk.Canvas(self, bg=master.bg_colour, highlightthickness=0)
         self.select_canvas.pack(side='top', fill='both', expand=True)
-        self.label = tk.Label(self.button_canvas, text="Select a background", bg=master.bg_colour, fg=master.text_colour)
+        self.label = tk.Label(self.button_canvas, text="Select a background", bg=master.bg_colour,
+                              fg=master.text_colour)
         self.label.pack(side="right", expand=True)
         self.label.config(font=master.font)
 
@@ -150,8 +151,10 @@ class PageTwo(tk.Frame):
         self.right_button.image = right_arrow_img
         self.right_button.pack(side="right")
 
-        self.image = tk.Button(self.select_canvas, borderwidth=0, relief='flat', bg=master.bg_colour, image=photo_booth.backgrounds_select[photo_booth.imageNumber],
-                               highlightthickness=0, activebackground=master.bg_colour, command=lambda: master.switch_frame(PageThree))
+        self.image = tk.Button(self.select_canvas, borderwidth=0, relief='flat', bg=master.bg_colour,
+                               image=photo_booth.backgrounds_select[photo_booth.imageNumber],
+                               highlightthickness=0, activebackground=master.bg_colour,
+                               command=lambda: master.switch_frame(PageThree))
         self.image.image = photo_booth.backgrounds_select[photo_booth.imageNumber]
         self.image.pack()
 

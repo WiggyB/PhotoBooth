@@ -75,6 +75,7 @@ class PhotoBooth:
             f.write(str(self.picture_number))
             f.close()
 
+    # Takes picture and starts the process for creating the preview image
     def take_picture(self, user_interface):
         self.picture_number += 1
         self.image = self.camera.take_picture()
@@ -84,7 +85,7 @@ class PhotoBooth:
         user_interface.show_picture()
 
     # Takes the picture, sends it for processing and then sends relevant info to twitter and dropbox objects
-    def accept_picture(self, user_interface):
+    def accept_picture(self):
         # Send to image manipulation class
         f = open('config.cfg', 'w')
         f.write(str(self.picture_number))
@@ -98,6 +99,7 @@ class PhotoBooth:
         twitter_process = multiprocessing.Process(self.twitter.tweet_picture(merged_image, "Picture Number " +
                                                                              str(self.picture_number) +
                                                                              ". #KatieChrisWedding2019", self.picture_number))
+
         processes = [dropbox_process1, dropbox_process2, twitter_process]
 
         for process in processes:

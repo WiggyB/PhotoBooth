@@ -1,9 +1,9 @@
 from PIL import Image
 import multiprocessing
 import math
-import time
 
 
+# Applies Euclidean Chroma Key Algorithm
 def chroma_key(chunks_list):
 
     for y in range(chunks_list[0].size[1]):
@@ -18,7 +18,6 @@ def chroma_key(chunks_list):
 
 def merge(foreground, background):
 
-    start = time.time()
     number_of_chunks = multiprocessing.cpu_count() * 8
     # Load images
     image_size = foreground.size

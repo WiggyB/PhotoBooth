@@ -1,3 +1,4 @@
+import glob
 import os
 import ImageMergeMulti
 from PIL import Image, ImageTk
@@ -24,7 +25,7 @@ class PhotoBooth:
     token_secret = "6qFafsqUFPwUKtljd5WYGvt1xTtfUMYJH5UYuLzCj7inF"
     consumer_key = "wQy0diWcyl1G4GP4eF1arBPtS"
     consumer_secret = "B3JsT7UuB57ncKhZD174iR6k3kQ8lhKa6xj51h9i9l0mfO7S8F"
-    preview_ratio = 5
+    select_size = (300, 300)
     image_size = (2592, 1944)
     preview_size = (640, 480)
 
@@ -42,16 +43,16 @@ class PhotoBooth:
         self.backgrounds_select = []
         self.backgrounds_full = []
         self.backgrounds_preview = []
-        self.ImageNumber = 0
+        self.imageNumber = 0
         self.merge_path = ''
         self.image = None
-
-        images = ["images/nature.jpg", "images/punk.jpg", "images/spacebackground.jpg"]
+        images = glob.glob('images/backgrounds/*.jpg')
+#        print(images)
+#        images = ["images/nature.jpg", "images/punk.jpg", "images/spacebackground.jpg"]
 
         for image in images:
             data = Image.open(image)
-            select_image = data.resize((int(data.size[0]/self.preview_ratio), int(data.size[1]/self.preview_ratio)),
-                                       Image.ANTIALIAS)
+            select_image = data.resize(self.select_size, Image.ANTIALIAS)
             select_image = ImageTk.PhotoImage(select_image)
             full_image = data.resize(self.image_size, Image.ANTIALIAS)
             preview_image = data.resize(self.preview_size, Image.ANTIALIAS)
@@ -77,14 +78,10 @@ class PhotoBooth:
     def take_picture(self, user_interface):
         self.picture_number += 1
         self.image = self.camera.take_picture()
-        print('taken picture')
         preview_image = self.image.resize(self.preview_size, Image.ANTIALIAS)
         merged_preview = ImageMergeMulti.merge(preview_image, self.backgrounds_preview[self.background_choice])
-        print("merged preview")
         user_interface.set_merged_preview(merged_preview)
-        print('triggering show_picture')
         user_interface.show_picture()
-        print('triggered show_picture')
 
     # Takes the picture, sends it for processing and then sends relevant info to twitter and dropbox objects
     def accept_picture(self, user_interface):
@@ -100,10 +97,9 @@ class PhotoBooth:
                                                                                str(self.picture_number) + "RAW"))
         twitter_process = multiprocessing.Process(self.twitter.tweet_picture(merged_image, "Picture Number " +
                                                                              str(self.picture_number) +
-                                                                             ". #KatieChris2019"))
+                                                                             ". #KatieChrisWedding2019", self.picture_number))
         processes = [dropbox_process1, dropbox_process2, twitter_process]
 
         for process in processes:
             process.start()
-        user_interface.num_of_processes -= 1
-        print("upload processes started")
+

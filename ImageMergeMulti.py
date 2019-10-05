@@ -10,7 +10,7 @@ def chroma_key(chunks_list):
         for x in range(chunks_list[0].size[0]):
             p = chunks_list[0].getpixel((x, y))
             d = math.sqrt(math.pow(p[0] - 10, 2) + math.pow((p[1] - 255), 2) + math.pow(p[2] - 10, 2))
-            if d < 185:
+            if d < 200:
                 background_pixel = chunks_list[1].getpixel((x, y))
                 chunks_list[0].putpixel((x, y), (background_pixel[0], background_pixel[1], background_pixel[2]))
     return chunks_list[0]
@@ -19,7 +19,6 @@ def chroma_key(chunks_list):
 def merge(foreground, background):
 
     start = time.time()
-    print("starting merge, in merge class")
     number_of_chunks = multiprocessing.cpu_count() * 8
     # Load images
     image_size = foreground.size
@@ -36,9 +35,7 @@ def merge(foreground, background):
         x_value += chunk_size
 
     # Generate process pool
-    print("creating pool")
     pool = multiprocessing.Pool()
-    print("created pool")
     # Distribute the parameter sets evenly across the cores
     result = pool.map(chroma_key, image_chunks)
     pool.close()
@@ -47,5 +44,4 @@ def merge(foreground, background):
     # Reassemble chunks
     for c in range(number_of_chunks):
         output_img.paste(result[c], (chunk_size*c, 0, chunk_size*(c + 1), image_size[1]))
-    print("pictures merged: " + str(time.time() - start))
     return output_img

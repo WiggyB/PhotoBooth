@@ -23,8 +23,9 @@ class BackgroundThread:
     def run_preview_thread(self):
         photo_booth.take_picture(self.tk_thread)
 
-    def run_full_thread(self):
-        photo_booth.accept_picture(self.tk_thread)
+    @staticmethod
+    def run_full_thread():
+        photo_booth.accept_picture()
 
 
 # Master TK object
@@ -37,6 +38,7 @@ class App(tk.Tk):
         self.attributes('-fullscreen', True)
         # Makes cursor invisible on Raspberry Pi
         if os.uname()[4][:3] == 'arm':
+            os.chdir('/home/pi/Desktop/TM470_Project')
             self.config(cursor='none')
         self.title("Photo Booth")
         self.count = 0
@@ -242,7 +244,6 @@ class PageFive(tk.Frame):
 
 # Start main loop
 if __name__ == "__main__":
-    os.chdir('/home/pi/Desktop/TM470_Project')
     app = App()
     photo_booth = PhotoBoothClass.PhotoBooth()  # Creates PhotoBoothClass object
     app.mainloop()

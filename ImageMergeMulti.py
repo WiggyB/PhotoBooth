@@ -21,7 +21,7 @@ def merge(foreground, background):
     number_of_chunks = multiprocessing.cpu_count() * 8
     # Load images
     image_size = foreground.size
-    output_img = Image.new("RGBA", image_size)
+    output_img = Image.new("RGB", image_size)
     chunk_size = int(image_size[0] / number_of_chunks)
     image_chunks = []
 

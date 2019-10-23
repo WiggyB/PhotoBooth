@@ -26,12 +26,11 @@ class TwitterObject:
     def tweet_picture(self, image, text, image_number):
         try:
             img_byte = io.BytesIO()
-            image.save(img_byte, format='PNG')
+            image.save(img_byte, format='JPEG')
             img_byte = img_byte.getvalue()
             id_img = self.t_upload.media.upload(media=img_byte)["media_id_string"]
             self.t_tweet.statuses.update(status=text, media_ids=id_img)
-
-            # if dropbox_uploads is not empty, try uploading them
+            # if twitter_uploads is not empty, try uploading them
             if os.stat("twitter_uploads.cfg").st_size != 0:
                 self.try_uploads()
 

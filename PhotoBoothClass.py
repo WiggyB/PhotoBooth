@@ -98,7 +98,8 @@ class PhotoBooth:
                                                                                str(self.picture_number) + "RAW"))
         twitter_process = multiprocessing.Process(self.twitter.tweet_picture(merged_image, "Picture Number " +
                                                                              str(self.picture_number) +
-                                                                             ". #KatieChrisWedding2019", self.picture_number))
+                                                                             ". #KatieChrisWedding2019",
+                                                                             self.picture_number))
 
         processes = [dropbox_process1, dropbox_process2, twitter_process]
 
